@@ -5,15 +5,13 @@ WORKDIR /app
 RUN apk add --no-cache g++ git curl make python3 libc6-compat \
   && curl -f https://get.pnpm.io/v6.16.js | node - add --global pnpm
 
-RUN npm install -g npm@9.6.5
-
 FROM base AS dependencies
 
 COPY package.json pnpm-*.yaml turbo.json ./
 COPY ./schema/package.json ./schema/package.json
 COPY ./server/package.json ./server/package.json
 
-RUN npm install # --frozen-lockfile
+RUN pnpm install --frozen-lockfile
 
 FROM base AS builder
 
@@ -23,7 +21,7 @@ COPY --from=dependencies /app/node_modules ./node_modules
 COPY --from=dependencies /app/schema/node_modules ./schema/node_modules
 COPY --from=dependencies /app/server/node_modules ./server/node_modules
 
-RUN npm run build --filter server
+RUN pnpm run build --filter server
 
 FROM mcr.microsoft.com/playwright:v1.30.0-focal as production
 
@@ -36,8 +34,8 @@ RUN apt-get update \
 COPY --from=builder /app/package.json /app/pnpm-*.yaml /app/turbo.json ./
 COPY --from=builder /app/server/package.json ./server/package.json
 
-RUN npm dlx playwright install --with-deps chromium
-RUN npm install --filter server --prod --frozen-lockfile --workspace-root
+RUN pnpm dlx playwright install --with-deps chromium
+RUN pnpm install --filter server --prod --frozen-lockfile --workspace-root
 
 COPY --from=builder /app/server/dist ./server/dist
 
@@ -51,4 +49,4 @@ ENV PORT 3100
 HEALTHCHECK --interval=30s --timeout=20s --retries=3 --start-period=15s \
     CMD curl -fSs localhost:3100/health || exit 1
 
-CMD [ "npm", "run", "start", "--filter", "server" ]
+CMD [ "pnpm", "run", "start", "--filter", "server" ]
