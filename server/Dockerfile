@@ -11,7 +11,7 @@ COPY package.json pnpm-*.yaml turbo.json ./
 COPY ./schema/package.json ./schema/package.json
 COPY ./server/package.json ./server/package.json
 
-RUN pnpm install # --frozen-lockfile
+RUN npm install # --frozen-lockfile
 
 FROM base AS builder
 
@@ -21,7 +21,7 @@ COPY --from=dependencies /app/node_modules ./node_modules
 COPY --from=dependencies /app/schema/node_modules ./schema/node_modules
 COPY --from=dependencies /app/server/node_modules ./server/node_modules
 
-RUN pnpm run build --filter server
+RUN npm run build --filter server
 
 FROM mcr.microsoft.com/playwright:v1.30.0-focal as production
 
@@ -34,8 +34,8 @@ RUN apt-get update \
 COPY --from=builder /app/package.json /app/pnpm-*.yaml /app/turbo.json ./
 COPY --from=builder /app/server/package.json ./server/package.json
 
-RUN pnpm dlx playwright install --with-deps chromium
-RUN pnpm install --filter server --prod --frozen-lockfile --workspace-root
+RUN npm dlx playwright install --with-deps chromium
+RUN npm install --filter server --prod --frozen-lockfile --workspace-root
 
 COPY --from=builder /app/server/dist ./server/dist
 
@@ -49,4 +49,4 @@ ENV PORT 3100
 HEALTHCHECK --interval=30s --timeout=20s --retries=3 --start-period=15s \
     CMD curl -fSs localhost:3100/health || exit 1
 
-CMD [ "pnpm", "run", "start", "--filter", "server" ]
+CMD [ "npm", "run", "start", "--filter", "server" ]
