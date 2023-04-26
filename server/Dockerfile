@@ -5,6 +5,8 @@ WORKDIR /app
 RUN apk add --no-cache g++ git curl make python3 libc6-compat \
   && curl -f https://get.pnpm.io/v6.16.js | node - add --global pnpm
 
+RUN npm install -g npm@9.6.5
+
 FROM base AS dependencies
 
 COPY package.json pnpm-*.yaml turbo.json ./
