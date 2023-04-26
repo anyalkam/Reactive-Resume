@@ -11,7 +11,7 @@ COPY package.json pnpm-*.yaml turbo.json ./
 COPY ./schema/package.json ./schema/package.json
 COPY ./client/package.json ./client/package.json
 
-RUN pnpm install --frozen-lockfile
+RUN pnpm install # --frozen-lockfile
 
 FROM base as builder
 
