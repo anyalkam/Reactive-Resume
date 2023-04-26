@@ -11,7 +11,7 @@ COPY package.json pnpm-*.yaml turbo.json ./
 COPY ./schema/package.json ./schema/package.json
 COPY ./server/package.json ./server/package.json
 
-RUN pnpm install --frozen-lockfile
+RUN pnpm install
 
 FROM base AS builder
 
@@ -35,7 +35,7 @@ COPY --from=builder /app/package.json /app/pnpm-*.yaml /app/turbo.json ./
 COPY --from=builder /app/server/package.json ./server/package.json
 
 RUN pnpm dlx playwright install --with-deps chromium
-RUN pnpm install --filter server --prod --frozen-lockfile --workspace-root
+RUN pnpm install --filter server --prod --workspace-root
 
 COPY --from=builder /app/server/dist ./server/dist
 
