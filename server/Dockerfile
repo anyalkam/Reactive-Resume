@@ -7,9 +7,9 @@ RUN apk add --no-cache g++ git curl make python3 libc6-compat \
 
 FROM base AS dependencies
 
-COPY package.json pnpm-*.yaml turbo.json ./
-COPY ./schema/package.json ./schema/package.json
-COPY ./server/package.json ./server/package.json
+COPY ../../Reactive-Resume/server/package.json pnpm-*.yaml turbo.json ./
+COPY ../../Reactive-Resume/schema/package.json ./schema/package.json
+COPY ../../Reactive-Resume/server/package.json ./server/package.json
 
 RUN pnpm install --frozen-lockfile
 
