@@ -5,16 +5,13 @@ WORKDIR /app
 RUN apk add --no-cache g++ git curl make python3 libc6-compat \
   && curl -f https://get.pnpm.io/v6.16.js | node - add --global pnpm
 
-RUN npm install -g npm@9.6.5
-
 FROM base as dependencies
 
 COPY package.json pnpm-*.yaml turbo.json ./
 COPY ./schema/package.json ./schema/package.json
 COPY ./client/package.json ./client/package.json
 
-RUN npm install # --frozen-lockfile
-
+RUN pnpm install
 FROM base as builder
 
 COPY . .
@@ -23,14 +20,14 @@ COPY --from=dependencies /app/node_modules ./node_modules
 COPY --from=dependencies /app/schema/node_modules ./schema/node_modules
 COPY --from=dependencies /app/client/node_modules ./client/node_modules
 
-RUN npm run build --filter client
+RUN pnpm run build --filter client
 
 FROM base as production
 
 COPY --from=builder /app/package.json /app/pnpm-*.yaml /app/turbo.json ./
 COPY --from=builder /app/client/package.json ./client/package.json
 
-RUN npm install --filter client --prod --frozen-lockfile --workspace-root
+RUN pnpm install --filter client --prod  --workspace-root
 
 COPY --from=builder /app/client/.next ./client/.next
 COPY --from=builder /app/client/public ./client/public
@@ -44,4 +41,4 @@ ENV PORT 3000
 HEALTHCHECK --interval=30s --timeout=20s --retries=3 --start-period=15s \
     CMD curl -fSs localhost:3000 || exit 1
 
-CMD [ "npm", "run", "start", "--filter", "client" ]
+CMD [ "pnpm", "run", "start", "--filter", "client" ]
