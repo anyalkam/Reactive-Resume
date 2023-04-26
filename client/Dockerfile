@@ -7,15 +7,15 @@ RUN apk add --no-cache g++ git curl make python3 libc6-compat \
 
 FROM base as dependencies
 
-COPY ../../Reactive-Resume/package.json ../../Reactive-Resume/pnpm-*.yaml ../../Reactive-Resume/turbo.json ../../Reactive-Resume/client/
-COPY ../../Reactive-Resume/schema/package.json ./schema/package.json
-COPY ../../Reactive-Resume/client/package.json ./client/package.json
+COPY package.json pnpm-*.yaml turbo.json ./
+COPY ./schema/package.json ./schema/package.json
+COPY ./client/package.json ./client/package.json
 
 RUN pnpm install --frozen-lockfile
 
 FROM base as builder
 
-COPY ../../Reactive-Resume/client .
+COPY . .
 
 COPY --from=dependencies /app/node_modules ./node_modules
 COPY --from=dependencies /app/schema/node_modules ./schema/node_modules
