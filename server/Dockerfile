@@ -12,7 +12,7 @@ COPY ./schema/package.json ./schema/package.json
 COPY ./server/package.json ./server/package.json
 
 RUN pnpm install
-
+RUN npx @turbo/codemod add-package-manager --package-manager pnpm
 FROM base AS builder
 
 COPY . .
@@ -33,6 +33,7 @@ RUN apt-get update \
 
 COPY --from=builder /app/package.json /app/pnpm-*.yaml /app/turbo.json ./
 COPY --from=builder /app/server/package.json ./server/package.json
+
 
 RUN pnpm dlx playwright install --with-deps chromium
 RUN pnpm install --filter server --prod --workspace-root
